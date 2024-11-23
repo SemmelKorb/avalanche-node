@@ -93,6 +93,18 @@ app.post('/addNote', (req, res) => {
     });
 });
 
+app.delete('/delete/:id', (req, res) => {
+    const noteId = Number(req.params.id);
+    const query = `delete from notes where id = ?`
+    connection.query(query, [noteId], (err, results) => {
+        if (err) {
+            console.error('Error deleting note:', err);
+            return res.status(500).json({ error: 'Error' });
+        }
+        res.status(200).json({ message: 'Note deleted successfully' });
+    });
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })

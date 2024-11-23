@@ -7,7 +7,7 @@ const mysql = require("mysql2");
 app.use(cors({
     origin: 'http://localhost:5173'
 }));
-
+app.use(express.json());
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -40,11 +40,11 @@ app.get('/notes', async (req, res) => {
 
 
 app.get('/notes/:id', (req, res) => {
-    const recipeId = Number(req.params.id);
+    const noteId = Number(req.params.id);
 
     connection.query(
         `SELECT * FROM notes WHERE id = ?`,
-        [recipeId],
+        [noteId],
         function (err, results) {
             if (err) {
                 return res.status(500).json({ message: "Error fetching notes from database." });
@@ -57,6 +57,29 @@ app.get('/notes/:id', (req, res) => {
         }
     );
 });
+
+app.put('/updateNote/:id', (req, res) => {
+    const noteId = Number(req.params.id);
+    const { title, content } = req.body;
+
+    const query = `
+        UPDATE notes
+        SET title = ?, content = ?
+        WHERE id = ?
+    `;
+
+    connection.query(query, [title, content, noteId], (err, results) => {
+        if (err) {
+            console.error('Error updating note:', err);
+            return res.status(500).json({ error: 'Failed to update note' });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'Note not found' });
+        }
+        res.status(200).json({ message: 'Note updated successfully' });
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

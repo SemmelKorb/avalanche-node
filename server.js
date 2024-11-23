@@ -80,6 +80,18 @@ app.put('/updateNote/:id', (req, res) => {
     });
 });
 
+app.post('/addNote', (req, res) => {
+    const { title, content, datetime } = req.body;
+
+    const query = `insert into notes (title, content, creationDate) value (?,?,?)`
+    connection.query(query, [title, content, datetime], (err, results) => {
+        if (err) {
+            console.error('Error updating note:', err);
+            return res.status(500).json({ error: 'Error' });
+        }
+        res.status(200).json({ message: 'Note added successfully' });
+    });
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

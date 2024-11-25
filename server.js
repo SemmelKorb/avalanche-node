@@ -5,7 +5,7 @@ const port = 3000
 const mysql = require("mysql2");
 
 app.use(cors({
-    origin: 'http://localhost:5173'
+    origin: 'http://localhost:7319'
 }));
 app.use(express.json());
 

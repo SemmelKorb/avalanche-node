@@ -5,7 +5,7 @@ const port = 3000
 const mysql = require("mysql2");
 
 app.use(cors({
-    origin: 'http://localhost:7319'
+    origin: 'http://localhost:7319  '
 }));
 app.use(express.json());
 
@@ -40,10 +40,10 @@ app.get('/notes', async (req, res) => {
 
 
 app.get('/notes/:id', (req, res) => {
-    const noteId = Number(req.params.id);
-
+    const noteId = req.params.id;
+    console.log(noteId)
     connection.query(
-        `SELECT * FROM notes WHERE id = ?`,
+        `SELECT * FROM notes WHERE uuid = ?`,
         [noteId],
         function (err, results) {
             if (err) {
@@ -58,8 +58,8 @@ app.get('/notes/:id', (req, res) => {
     );
 });
 
-app.put('/updateNote/:id', (req, res) => {
-    const noteId = Number(req.params.id);
+app.put('/notes/:id', (req, res) => {
+    const noteId = req.params.id;
     const { title, content } = req.body;
 
     const query = `
@@ -80,18 +80,35 @@ app.put('/updateNote/:id', (req, res) => {
     });
 });
 
-app.post('/addNote', (req, res) => {
-    const { title, content, datetime } = req.body;
+app.post('/notes', (req, res) => {
+    const { title, content, isFav, creationDate } = req.body;
 
-    const query = `insert into notes (title, content, creationDate) value (?,?,?)`
-    connection.query(query, [title, content, datetime], (err, results) => {
+    const query = `INSERT INTO notes (title, content, isFav, creationDate) VALUES (?,?,?,?)`;
+
+    connection.query(query, [title, content, isFav, creationDate], (err, results) => {
         if (err) {
-            console.error('Error updating note:', err);
-            return res.status(500).json({ error: 'Error' });
+            console.error('Error inserting note:', err);
+            return res.status(500).json({ error: 'Error inserting note' });
         }
-        res.status(200).json({ message: 'Note added successfully' });
+
+        const lastInsertIdQuery = `SELECT uuid FROM notes WHERE uuid = LAST_INSERT_ID()`;
+
+        connection.query(lastInsertIdQuery, (err, rows) => {
+            if (err) {
+                console.error('Error fetching UUID:', err);
+                return res.status(500).json({ error: 'Error fetching UUID' });
+            }
+
+            if (rows.length > 0) {
+                const uuid = rows[0].uuid;
+                res.status(200).json({ id: uuid, message: `Note created with UUID: ${uuid}` });
+            } else {
+                res.status(500).json({ error: 'UUID not found for the inserted note' });
+            }
+        });
     });
 });
+
 
 app.delete('/delete/:id', (req, res) => {
     const noteId = Number(req.params.id);

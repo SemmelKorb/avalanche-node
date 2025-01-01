@@ -33,7 +33,7 @@ app.get('/notes:offset', async (req, res) => {
 
 app.get('/notesPinned', async (req, res) => {
     try {
-        const { rows } = await pool.query('SELECT * FROM notes WHERE isfavourite = 1')
+        const { rows } = await pool.query('SELECT * FROM notes WHERE isFav = 1')
         res.send(rows);
     } catch (err) {
         res.status(500).send('Error returning favourite notes');

@@ -3,7 +3,7 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const app = express();
 const port = 3000;
-const elias = 1;
+
 app.use(cors({
     origin: 'http://localhost:7319'
 }));
@@ -21,10 +21,10 @@ app.get('/', (req, res) => {
     res.send('Welcome to PaulHackerPage:');
 });
 
-app.get('/notes:offset', async (req, res) => {
+app.get('/notes/:offset', async (req, res) => {
     const offset = req.params.offset
     try {
-        const { rows } = await pool.query('SELECT * FROM notes OFFSET = $1 LIMIT = 25', [offset]);
+        const { rows } = await pool.query('SELECT * FROM notes OFFSET $1 LIMIT 25', [offset]);
         res.send(rows);
     } catch (err) {
         res.status(500).send('Error fetching notes from database');
@@ -40,7 +40,7 @@ app.get('/notesPinned', async (req, res) => {
     }
 });
 
-app.get('/notes/:id', async (req, res) => {
+app.get('/note/:id', async (req, res) => {
     const noteId = req.params.id;
     try {
         const { rows } = await pool.query('SELECT * FROM notes WHERE id = $1', [noteId]);
@@ -54,7 +54,7 @@ app.get('/notes/:id', async (req, res) => {
     }
 });
 
-app.put('/notes/:id', async (req, res) => {
+app.put('/note/:id', async (req, res) => {
     const noteId = req.params.id;
     const { title, content } = req.body;
 
@@ -73,7 +73,7 @@ app.put('/notes/:id', async (req, res) => {
     }
 });
 
-app.post('/notes', async (req, res) => {
+app.post('/note', async (req, res) => {
     const { title, content, isFav, creationDate } = req.body;
 
     try {
@@ -82,7 +82,8 @@ app.post('/notes', async (req, res) => {
             [title, content, isFav, creationDate]
         );
         const id = rows[0].id;
-        res.status(200).json({ id: id, message: `Note created with ID: ${id}` });
+        const creationdate = rows[0].creationDate
+        res.status(200).json({ id: id, creationDate: creationdate, message: `Note created with ID: ${id}` });
     } catch (err) {
         console.error('Error inserting note:', err);
         res.status(500).json({ error: 'Error inserting note' });

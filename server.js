@@ -3,7 +3,7 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const app = express();
 const port = 3000;
-
+const elias = 1;
 app.use(cors({
     origin: 'http://localhost:7319'
 }));

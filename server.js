@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const app = express();
 const port = 3000;
 
+
 app.use(cors({
     origin: 'http://localhost:7319'
 }));
@@ -43,6 +44,7 @@ app.get('/notesPinned', async (req, res) => {
 });
 
 app.get('/note/:id', async (req, res) => {
+app.get('/note/:id', async (req, res) => {
     const noteId = req.params.id;
     try {
         const { rows } = await pool.query('SELECT * FROM notes WHERE id = $1', [noteId]);
@@ -56,6 +58,7 @@ app.get('/note/:id', async (req, res) => {
     }
 });
 
+app.put('/note/:id', async (req, res) => {
 app.put('/note/:id', async (req, res) => {
     const noteId = req.params.id;
     const { title, content } = req.body;
@@ -76,6 +79,7 @@ app.put('/note/:id', async (req, res) => {
 });
 
 app.post('/note', async (req, res) => {
+app.post('/note', async (req, res) => {
     const { title, content, isFav, creationDate } = req.body;
 
     try {
@@ -84,6 +88,8 @@ app.post('/note', async (req, res) => {
             [title, content, isFav, creationDate]
         );
         const id = rows[0].id;
+        const creationdate = rows[0].creationDate
+        res.status(200).json({ id: id, creationDate: creationdate, message: `Note created with ID: ${id}` });
         const creationdate = rows[0].creationDate
         res.status(200).json({ id: id, creationDate: creationdate, message: `Note created with ID: ${id}` });
     } catch (err) {

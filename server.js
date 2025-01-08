@@ -77,11 +77,11 @@ app.post('/note', async (req, res) => {
 
     try {
         const { rows } = await pool.query(
-            'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING uuid, creationDate',
+            'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING uuid, creationdate',
             [title, content]
         );
-        const id = rows[0].id;
-        const creationdate = rows[0].creationDate
+        const id = rows[0].uuid;
+        const creationdate = rows[0].creationdate
         res.status(200).json({ id: id, creationDate: creationdate, message: `Note created with ID: ${id}` });
     } catch (err) {
         console.error('Error inserting note:', err);

@@ -4,10 +4,8 @@ const { Pool } = require('pg');
 const app = express();
 const port = 3000;
 
-app.use(cors({
-    origin: 'http://localhost:7319'
-}));
 app.use(express.json());
+app.use(cors())
 
 const pool = new Pool({
     host: 'localhost',
@@ -56,14 +54,13 @@ app.get('/note/:id', async (req, res) => {
     }
 });
 
-app.put('/note/:id', async (req, res) => {
-    const noteId = req.params.id;
-    const { title, content } = req.body;
+app.put('/note', async (req, res) => {
+    const { noteId, title, content, isFav } = req.body;
 
     try {
         const { rowCount } = await pool.query(
-            'UPDATE notes SET title = $1, content = $2 WHERE id = $3',
-            [title, content, noteId]
+            'UPDATE notes SET title = $1, content = $2, isfav = $3 WHERE uuid = $4',
+            [title, content, isFav, noteId]
         );
         if (rowCount === 0) {
             return res.status(404).json({ error: 'Note not found' });
@@ -76,12 +73,12 @@ app.put('/note/:id', async (req, res) => {
 });
 
 app.post('/note', async (req, res) => {
-    const { title, content, isFav, creationDate } = req.body;
+    const { title, content } = req.body;
 
     try {
         const { rows } = await pool.query(
-            'INSERT INTO notes (title, content, isFav, creationDate) VALUES ($1, $2, $3, $4) RETURNING id',
-            [title, content, isFav, creationDate]
+            'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING uuid',
+            [title, content]
         );
         const id = rows[0].id;
         const creationdate = rows[0].creationDate

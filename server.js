@@ -77,7 +77,7 @@ app.post('/note', async (req, res) => {
 
     try {
         const { rows } = await pool.query(
-            'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING uuid',
+            'INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING uuid, creationDate',
             [title, content]
         );
         const id = rows[0].id;
